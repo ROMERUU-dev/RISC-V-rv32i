@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RISC-V RV32I · Chip Design Club</title>
+<meta name="description" content="RISC-V RV32I: procesador de 32 bits de ciclo único que se programa por bloques vía UART y SPI. Tapeout en SKY130 con Tiny Tapeout.">
+<meta name="theme-color" content="#05070d">
+<link rel="canonical" href="https://romeruu-dev.github.io/chip-design-club/riscv-rv32i">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Chip Design Club · UABC">
+<meta property="og:locale" content="es_MX">
+<meta property="og:title" content="RISC-V RV32I · Chip Design Club">
+<meta property="og:description" content="Procesador RISC-V de 32 bits de ciclo único, programado por bloques vía UART y SPI. Tapeout en SKY130.">
+<meta property="og:url" content="https://romeruu-dev.github.io/chip-design-club/riscv-rv32i">
+<meta property="og:image" content="https://romeruu-dev.github.io/RISC-V-rv32i/assets/og/riscv-rv32i_og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "RISC-V RV32I", "description": "Procesador RISC-V RV32I de ciclo único, programado por bloques vía UART y SPI, fabricado en SKY130 con Tiny Tapeout.", "image": "https://romeruu-dev.github.io/RISC-V-rv32i/assets/og/riscv-rv32i_og.jpg", "url": "https://romeruu-dev.github.io/chip-design-club/riscv-rv32i", "inLanguage": "es-MX", "author": [{"@type": "Person", "name": "Vanessa Rocha Pérez"}], "publisher": {"@type": "Organization", "name": "Chip Design Club · UABC"}}</script>
+<link rel="preload" href="assets/fonts/Inter-Regular.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="assets/fonts/Inter-ExtraBold.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="assets/css/story.css?v=20261024">
+</head>
+<body data-post="riscv-rv32i">
+<div class="top">
+  <div class="bars" aria-hidden="true"></div>
+  <div class="meta"><a href="https://romeruu-dev.github.io/chip-design-club/">← Inicio</a><span><span class="u">TTSKY26d</span> · SKY130</span></div>
+</div>
+<main class="deck">
+
+<!-- 1 · portada -->
+<section class="scene wide">
+  <div class="inner">
+    <div class="kicker r">Proyecto de tapeout · Digital</div>
+    <h1 class="r" style="--i:1">RISC-V RV32I</h1>
+    <p class="r" style="--i:2;font-size:20px">Un procesador RISC-V de 32 bits que ejecuta <b class="acc">una instrucción por ciclo</b> de reloj.</p>
+    <div class="plate fit r" data-parallax="16" style="--i:3;margin-top:22px;--ph:40dvh">
+      <div class="stage">
+        <img src="assets/img/riscv-rv32i/layout.webp" alt="Layout completo del procesador RISC-V RV32I" width="3000" height="992">
+        <div class="scalebar" style="width:14.65%"><span>100 µm</span><div class="bar"></div></div>
+      </div>
+    </div>
+    <div class="row r" style="--i:4">
+      <div class="dim">Layout completo · KLayout</div>
+      <div class="dim" style="text-align:right">682.6 × 225.8 <span class="u">µm</span> · 4×2 tiles</div>
+    </div>
+    <div class="chips r" style="--i:5"><span class="chip on">SKY130 · 130 nm</span><span class="chip">Digital · 9 323 celdas lógicas</span><span class="chip">10 MHz</span></div>
+  </div>
+</section>
+
+<!-- 2 · equipo -->
+<section class="scene">
+  <div class="inner">
+    <div class="kicker r">El equipo</div>
+    <h2 class="r" style="--i:1">Quiénes lo llevaron<br>hasta el silicio</h2>
+    <div class="person r" style="--i:2"><div class="avatar">VR</div><div><div class="role">Diseñadora</div><div class="name">Vanessa<br>Rocha Pérez</div></div></div>
+    <div class="person r" style="--i:3"><div class="avatar">JV</div><div><div class="role">Supervisor</div><div class="name">José Luis Valtierra<br>Sánchez de la Vega</div></div></div>
+    <p class="r" style="--i:4;margin-top:28px">Su diseño fue enviado a fabricación (<b>tapeout</b>) con <b>Tiny Tapeout</b>, en el proceso de 130 nm <b>SKY130</b> de SkyWater.</p>
+    <div class="dim r" style="--i:5;margin-top:18px">UABC · Facultad de Ingeniería Mexicali</div>
+  </div>
+</section>
+
+<!-- 3 · los tres modos, conforme bajas -->
+<section class="seq" data-seq="modes" style="--steps:4">
+  <div class="sticky"><div class="inner">
+    <div class="kicker">¿Cómo funciona?</div>
+    <h2>Un procesador que<br>se carga por partes</h2>
+    <div class="screen modes"><svg viewBox="0 0 400 324" role="img" aria-label="El procesador recibe un bloque de 8 instrucciones por UART, lo ejecuta, pide el siguiente bloque a una memoria SPI y continúa con los registros intactos"></svg></div>
+    <div class="ticks" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="step-label">
+      <div class="on"><div class="t">01 · LOAD · <span class="mono">00</span></div><div class="d">Desde la computadora llega el bloque 0 por UART: 32 bytes, es decir, 8 instrucciones.</div></div>
+      <div><div class="t">02 · RUN · <span class="mono">01</span></div><div class="d">El procesador ejecuta una instrucción por ciclo de reloj, sin pipeline, y envía sus resultados por UART.</div></div>
+      <div><div class="t">03 · BLOCKLOAD · <span class="mono">10</span></div><div class="d">Al escribir en la dirección 0x4C, el programa pide el siguiente bloque; una memoria SPI externa lo envía.</div></div>
+      <div><div class="t">04 · De vuelta a RUN</div><div class="d">El PC regresa a 0, pero los registros conservan sus valores: el programa sigue donde se quedó.</div></div>
+    </div>
+    <div class="dim" style="margin-top:14px">Animación ilustrativa · programa de prueba: <span class="acc">0x0D 0x07 0x08 0x10 0xAA</span></div>
+  </div></div>
+</section>
+
+<!-- 4 · el layout se colorea y se acerca a cada bloque -->
+<section class="seq wide" data-seq="zoom" style="--steps:5" data-blocks='[{"l": 22.0, "t": 9.0, "w": 75.9, "h": 88.0, "z": 1.25}, {"l": 1.2, "t": 54.8, "w": 16.8, "h": 42.2, "z": 2.0}, {"l": 17.8, "t": 3.0, "w": 21.9, "h": 20.5, "z": 2.6}, {"l": 1.2, "t": 1.8, "w": 17.3, "h": 42.2, "z": 2.0}, {"l": 19.1, "t": 34.3, "w": 64.1, "h": 18.1, "z": 1.4}]'>
+  <div class="sticky"><div class="inner">
+    <div class="kicker">Anatomía del chip</div>
+    <h2>Dónde quedó cada parte<br>del procesador</h2>
+    <div class="plate seq-plate fit" style="--ph:44dvh;margin-top:18px">
+      <div class="stage">
+        <img src="assets/img/riscv-rv32i/layout.webp" alt="Layout del RISC-V" width="3000" height="992">
+        <img class="overlay" src="assets/img/riscv-rv32i/mapa.webp" alt="" width="3000" height="992">
+        <div class="scalebar" style="width:14.65%"><span>100 µm</span><div class="bar"></div></div>
+        <div class="marker"></div>
+      </div>
+    </div>
+    <div class="ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="step-label">
+      <div class="on"><div class="t">El chip completo</div><div class="d">682.6 × 225.8 µm, 9 323 celdas lógicas y 473 mm de interconexión ruteada. Al bajar, cada flip-flop se colorea según el registro al que pertenece.</div></div>
+      <div><div class="t"><i class="dot" style="--c:#7aa2ff"></i>Banco de registros</div><div class="d">32 registros de 32 bits: 1 024 flip-flops, más de la mitad de todos los del chip.</div></div>
+      <div><div class="t"><i class="dot" style="--c:#45e3b8"></i>Memoria de instrucciones</div><div class="d">8 palabras de 32 bits (256 flip-flops): un bloque del programa a la vez.</div></div>
+      <div><div class="t"><i class="dot" style="--c:#ffb13d"></i>Memoria de datos</div><div class="d">4 palabras de 32 bits (128 flip-flops) para las variables del programa.</div></div>
+      <div><div class="t"><i class="dot" style="--c:#ff5d8f"></i>UART, SPI y cargadores</div><div class="d">Reciben el bloque 0 por UART, leen los siguientes por SPI y envían los resultados. 238 flip-flops.</div></div>
+      <div><div class="t"><i class="dot" style="--c:#eef2f8"></i>PC, CSR y modo</div><div class="d">El contador de programa, los registros de excepciones y el registro de modo. En gris, la lógica combinacional (ALU, decodificador, multiplexores), que el mapa no asigna a ningún bloque.</div></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 5 · idea clave -->
+<section class="scene">
+  <div class="inner">
+    <div class="kicker r">La idea clave</div>
+    <h2 class="r" style="--i:1">8 instrucciones bastan<br>para programas largos</h2>
+    <div class="plate fit r" data-parallax="18" style="--i:2;margin-top:18px;--ph:30dvh"><img src="assets/img/riscv-rv32i/zoom.webp" alt="Acercamiento a las celdas de la memoria de instrucciones" width="1400" height="933" loading="lazy"></div>
+    <div class="dim r" style="--i:3;margin-top:10px">Acercamiento 30 × 20 <span class="u">µm</span> · zona de la memoria de instrucciones (<span class="u">sky130_fd_sc_hd__dfxtp_2</span>)</div>
+    <p class="r" style="--i:4">La primera versión guardaba todo el programa dentro del chip y ocupaba 12 tiles. Ahora sólo guarda <b>un bloque de 8 instrucciones</b> y pide los demás a una memoria externa: el diseño bajó a 8 tiles.</p>
+    <div class="stats r" style="--i:5">
+      <div class="stat"><div class="v" data-count="8">0</div><div class="k">tiles (antes 12)</div></div>
+      <div class="stat"><div class="v" data-count="33" data-suffix="&nbsp;%">0</div><div class="k">menos tiles</div></div>
+      <div class="stat"><div class="v" data-count="30">0</div><div class="k">instrucciones verificadas una por una</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · verificación -->
+<section class="scene">
+  <div class="inner">
+    <div class="kicker r">Verificación</div>
+    <h2 class="r" style="--i:1">Probado antes de<br>llegar al silicio</h2>
+    <ol class="levels r" style="--i:2">
+      <li><span><b>Modelo en Python, ciclo a ciclo.</b> 30 instrucciones de RV32I verificadas una por una, y 0 choques entre el CPU y los cargadores en 136 353 ciclos.</span></li>
+      <li><span><b>Simulación RTL con cocotb.</b> Carga el bloque 0 por UART, sirve los demás por SPI y compara la salida.</span></li>
+      <li><span><b>Netlist final de compuertas.</b> La misma prueba pasa sobre el circuito ya colocado y ruteado.</span></li>
+      <li><span><b>FPGA Basys3.</b> 10 de 10 programas de prueba entregan la salida esperada.</span></li>
+    </ol>
+    <figure class="term r" style="--i:3">
+      <img src="assets/img/riscv-rv32i/uart.webp" alt="Terminal RealTerm mostrando el texto RISC-V 32I Single Cycle BY Vanessa" width="742" height="94" loading="lazy">
+      <figcaption class="dim">Captura real · FPGA Basys3 respondiendo por UART en RealTerm</figcaption>
+    </figure>
+    <p class="ref r" style="--i:4">Resultados reportados por la autora en el repositorio; no se reprodujeron para esta publicación.</p>
+  </div>
+</section>
+
+<!-- 7 · ficha técnica -->
+<section class="scene">
+  <div class="inner">
+    <div class="kicker r">Ficha técnica</div>
+    <h2 class="r" style="--i:1">RISC-V RV32I en datos</h2>
+    <table class="r" style="--i:2">
+      <tr><td class="k">Proceso</td><td>SkyWater SKY130 · 130 nm · <span class="mono">sky130_fd_sc_hd</span></td></tr>
+      <tr><td class="k">Programa</td><td>Tiny Tapeout · shuttle TTSKY26d</td></tr>
+      <tr><td class="k">Área</td><td>682.6 × 225.8 µm · 4×2 tiles (≈ 0.154 mm²)</td></tr>
+      <tr><td class="k">Reloj</td><td>10 MHz · una instrucción por ciclo, sin pipeline</td></tr>
+      <tr><td class="k">Memoria</td><td>8 instrucciones + 4 datos de 32 bits · bloques de 32 bytes por SPI</td></tr>
+      <tr><td class="k">Puertos</td><td>UART 115 200 baud (<span class="mono">ui_in[3]</span>, <span class="mono">uo_out[4]</span>) · SPI en <span class="mono">uio[0:3]</span></td></tr>
+      <tr><td class="k">Celdas</td><td>9 323 lógicas (1 753 flip-flops) + 2 158 de pozo · utilización 76.3 %</td></tr>
+      <tr><td class="k">Timing</td><td>Holgura de setup +44.6 ns · de hold +0.02 ns (peor caso en 9 esquinas, periodo de 100 ns)</td></tr>
+      <tr><td class="k">Potencia</td><td>1.40 mW, estimada por análisis estático (esquina típica, 25 °C, 1.8 V)</td></tr>
+      <tr><td class="k">Verificación física</td><td>DRC (Magic): 0 errores · LVS: 0 diferencias · prueba a nivel de compuertas en CI</td></tr>
+    </table>
+    <p class="ref r" style="--i:3">Validación en silicio pendiente. Para ahorrar área, el diseño cerró con 56 redes con violaciones de antena, y con 6 373 violaciones de <i>slew</i> y 459 de capacitancia en la esquina más lenta (ss, 100 °C, 1.60 V); el timing de setup y hold sí cierra en las 9 esquinas. Su efecto se conocerá al medir el chip.</p>
+    <a class="btn solid r" style="--i:4" href="https://github.com/Vanessa-rp-star/RISC-V-rv32i" rel="noopener">Ver repositorio</a>
+    <a class="btn r" style="--i:4" href="https://gds-viewer.tinytapeout.com/?model=https://vanessa-rp-star.github.io/RISC-V-rv32i/tinytapeout.oas&amp;pdk=sky130A" rel="noopener">Verlo en 3D</a>
+  </div>
+</section>
+
+<!-- 8 · versión para Instagram -->
+<section class="scene wide">
+  <div class="inner">
+    <div class="kicker r">También en Instagram</div>
+    <h2 class="r" style="--i:1">Las 6 diapositivas</h2>
+    <p class="r" style="--i:2;font-size:15.5px">Mismo contenido en formato carrusel. Toca una para abrirla completa.</p>
+    <div class="r" style="--i:3"><div class="strip">
+      <a href="assets/instagram/riscv-rv32i_01.png" target="_blank" rel="noopener"><img src="assets/instagram/thumbs/riscv-rv32i_01.webp" alt="Diapositiva 1" loading="lazy" width="540" height="675"></a>
+      <a href="assets/instagram/riscv-rv32i_02.png" target="_blank" rel="noopener"><img src="assets/instagram/thumbs/riscv-rv32i_02.webp" alt="Diapositiva 2" loading="lazy" width="540" height="675"></a>
+      <a href="assets/instagram/riscv-rv32i_03.png" target="_blank" rel="noopener"><img src="assets/instagram/thumbs/riscv-rv32i_03.webp" alt="Diapositiva 3" loading="lazy" width="540" height="675"></a>
+      <a href="assets/instagram/riscv-rv32i_04.png" target="_blank" rel="noopener"><img src="assets/instagram/thumbs/riscv-rv32i_04.webp" alt="Diapositiva 4" loading="lazy" width="540" height="675"></a>
+      <a href="assets/instagram/riscv-rv32i_05.png" target="_blank" rel="noopener"><img src="assets/instagram/thumbs/riscv-rv32i_05.webp" alt="Diapositiva 5" loading="lazy" width="540" height="675"></a>
+      <a href="assets/instagram/riscv-rv32i_06.png" target="_blank" rel="noopener"><img src="assets/instagram/thumbs/riscv-rv32i_06.webp" alt="Diapositiva 6" loading="lazy" width="540" height="675"></a>
+    </div></div>
+  </div>
+</section>
+
+<!-- 9 · notas técnicas y fuentes -->
+<section class="scene">
+  <div class="inner notes">
+    <div class="kicker r">Notas técnicas y fuentes</div>
+    <h2 class="r" style="--i:1">De dónde salen<br>estos datos</h2>
+    <p class="r" style="--i:2;font-size:15.5px">Toca cada nota para abrirla. Datos consultados el 21 de octubre de 2026.</p>
+    <div class="r" style="--i:3;margin-top:18px">
+      <details>
+        <summary>Versión fabricada</summary>
+        <div class="body">
+          <p>Todo corresponde a lo que se envió al shuttle <b>TTSKY26d</b>: el commit <span class="mono">f61df17</span> del repositorio de la autora. El repositorio tiene cambios posteriores que no están en el chip.</p>
+          <p>Área, celdas, utilización, longitud de ruteo, timing, potencia, DRC y LVS salen del archivo <span class="mono">stats/metrics.csv</span> que generó LibreLane para ese shuttle. Las imágenes se renderizaron con KLayout a partir del <span class="mono">.oas</span> del mismo shuttle.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Conjunto de instrucciones</summary>
+        <div class="body">
+          <p>RV32I define 40 instrucciones: 37 de cómputo, memoria y control, más FENCE, ECALL y EBREAK. En el RTL fabricado, el decodificador cubre las 37, además de ECALL, MRET y la escritura de registros CSR. FENCE se ejecuta como una instrucción nula, lo que la especificación permite en un núcleo sencillo, y EBREAK no genera excepción.</p>
+          <p>Las <b>30 instrucciones verificadas una por una</b> son las que reporta el repositorio; esta publicación no repitió esas pruebas.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Cómo se hizo el mapa funcional</summary>
+        <div class="body">
+          <p>Cada flip-flop se clasificó por el nombre de la señal en su salida <span class="mono">Q</span> dentro de la netlist final: <span class="mono">u_rf.regs</span> es el banco de registros, <span class="mono">mi_imem.mem</span> la memoria de instrucciones, <span class="mono">mi_dmem.mem</span> la de datos, y los módulos <span class="mono">mi_boot</span>, <span class="mono">mi_block_loader</span>, <span class="mono">mi_spi_burst</span>, <span class="mono">mi_rx</span> y <span class="mono">mi_tx</span> forman el grupo de UART, SPI y cargadores. Lo demás (PC, CSR y modo) va en blanco.</p>
+          <p>Las posiciones vienen del layout: cada instancia conserva su nombre. La lógica combinacional se dibuja en gris porque después de la síntesis no pertenece de forma única a un bloque. Las zonas resaltadas abarcan del percentil 4 al 96 de las posiciones de cada grupo.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Cifras que conviene leer con cuidado</summary>
+        <div class="body">
+          <p><b>Celdas:</b> las 11 481 celdas estándar que reporta el flujo incluyen 2 158 celdas de pozo (<i>tap</i>), que no tienen función lógica; de ahí las 9 323 celdas lógicas.</p>
+          <p><b>Potencia:</b> 1.40 mW es una estimación del análisis estático con la actividad por defecto del flujo, no una medición.</p>
+          <p><b>Timing:</b> el margen de hold es de apenas 0.02 ns en la esquina rápida (ff, −40 °C, 1.95 V). Cierra, pero sin mucha holgura.</p>
+          <p><b>Área:</b> el 33 % menos se refiere a tiles reservados (12 → 8), no al área de las celdas.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Figuras ilustrativas</summary>
+        <div class="body">
+          <p>La animación de los modos es un esquema, no una simulación; los bytes que aparecen son la salida esperada del programa de prueba según el repositorio. El acercamiento muestra la región de 8 a 38 µm × 58 a 78 µm del layout, dentro de la zona de la memoria de instrucciones.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Fuentes</summary>
+        <div class="body">
+          <ol class="src">
+            <li>V. Rocha Pérez, <i>RISC-V-rv32i</i>, commit <a href="https://github.com/Vanessa-rp-star/RISC-V-rv32i/tree/f61df172487a6aa1ce87825c26284c2e535637ac" rel="noopener">f61df17</a>, GitHub.</li>
+            <li>Tiny Tapeout, shuttle TTSKY26d, <a href="https://github.com/TinyTapeout/tinytapeout-sky-26d/tree/main/projects/tt_um_vanessa_riscv" rel="noopener">projects/tt_um_vanessa_riscv</a> (GDS, netlist y métricas).</li>
+            <li>RISC-V International, <a href="https://riscv.org/specifications/ratified/" rel="noopener"><i>The RISC-V Instruction Set Manual, Volume I: Unprivileged ISA</i></a>.</li>
+            <li><a href="https://github.com/librelane/librelane" rel="noopener">LibreLane</a> (flujo RTL a GDS) y <a href="https://github.com/google/skywater-pdk" rel="noopener">SkyWater SKY130 PDK</a>.</li>
+          </ol>
+        </div>
+      </details>
+    </div>
+    <div class="r" style="--i:4;margin-top:22px"><a class="dim" href="https://romeruu-dev.github.io/chip-design-club/" style="text-decoration:none">← Todos los proyectos</a></div>
+  </div>
+</section>
+
+</main>
+<div class="hint" aria-hidden="true"><span>Desliza hacia abajo</span><b>↓</b></div>
+<script src="assets/js/story.js"></script>
+</body>
+</html>
